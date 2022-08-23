@@ -1,0 +1,31 @@
+steps:
+  - command: |
+      set -euo pipefail
+      /usr/bin/agent-scripts/generate-release-train.py \
+          --repo-name= test-release-train-github-workflow \
+          --repo-sha1=$REPO_SHA1 \
+          --chart-repo=${CHART_REPO:-} \
+          --chart-version=${CHART_VERSION:-} \
+          --chart=$CHART \
+          --version=${VERSION:-} \
+          --no-external-tests=${NO_EXTERNAL_TESTS:-false} \
+          --no-email-notifications=${NO_EMAIL_NOTIFICATIONS:-false} \
+          --prune=$PRUNE \
+          --skip-deployment-to-production=$${SKIP_DEPLOYMENT_TO_PRODUCTION:-false} \
+          --pull-requests=${PULL_REQUESTS:-} \
+        | buildkite-agent pipeline upload
+    label: ":pipeline: $CHART"
+    agents:
+      queue: "charts-in-cluster"
+      is_not_cornwall: "true"
+      ready: "true"
+      cluster: "global"
+      environment: "production"
+    retry:
+      automatic:
+        - exit_status: -1  # Agent was lost
+          limit: 2
+        - exit_status: 255 # Forced agent shutdown
+          limit: 2
+        - exit_status: 1 # Application errors
+          limit: 2
