@@ -1,0 +1,11 @@
+apiVersion: v2
+name: deleteme-vibhu
+version: 1.0.0
+
+tink:
+  deployment:
+    strategy: default
+    to_oxford_testing: True
+    to_on_prem: True
+    to_aggregation: True
+    to_global: True

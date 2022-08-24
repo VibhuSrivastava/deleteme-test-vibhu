@@ -1,0 +1,38 @@
+[
+    [
+        {"cluster": "cornwall", "environment": "testing"},
+        {"cluster": "oxford", "environment": "testing"}
+    ],
+    [
+        {"cluster": "aggregation", "environment": "staging"},
+        {"cluster": "barnsley", "environment": "staging"},
+        {"cluster": "cardiff", "environment": "staging"},
+        {"cluster": "farnham", "environment": "staging"},
+        {"cluster": "leeds", "environment": "staging"},
+        {"cluster": "oxford", "environment": "staging"},
+        {"cluster": "rugby", "environment": "staging"},
+        {"cluster": "oxford", "environment": "preprod"}
+    ],
+    [
+        {"cluster": "barnsley", "environment": "production"},
+        {"cluster": "cornwall", "environment": "production"},
+        {"cluster": "global", "environment": "production"},
+    ],
+    [
+        {"cluster": "cardiff", "environment": "production"},
+        {"cluster": "farnham", "environment": "production"},
+    ],
+    [
+        {"cluster": "aggregation", "environment": "production"},
+        {"cluster": "leeds", "environment": "production"},
+        {"cluster": "oxford", "environment": "production"},
+        {"cluster": "rugby", "environment": "production"}
+    ],
+    [
+        {"cluster": "neston", "environment": "staging"}
+    ],
+    [
+        {"cluster": "neston", "environment": "preprod"},
+        {"cluster": "neston", "environment": "production"}
+    ]
+]

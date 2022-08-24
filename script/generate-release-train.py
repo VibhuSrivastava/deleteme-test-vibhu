@@ -24,7 +24,7 @@ import sys
 import time
 import yaml  # pip install pyyaml
 
-from seb_deployment_policy import is_seb_restricted_date
+# from seb_deployment_policy import is_seb_restricted_date
 import subprocess
 import os
 
@@ -85,32 +85,30 @@ def main():
     parser = cli_args_parser()
     args = parser.parse_args()
 
-    workflow_run_url = os.getenv("WORKFLOW_RUN_URL")
-    commit_url = f"https://github.com/tink-ab/{args.repo_name}/commit/{args.repo_sha1}"
+    # workflow_run_url = os.getenv("WORKFLOW_RUN_URL")
+    # commit_url = f"https://github.com/tink-ab/{args.repo_name}/commit/{args.repo_sha1}"
 
-    if workflow_run_url is not None:
-        create_annotations(
-            "workflow_url",
-            "info",
-            f"Triggered by [Github Action]({workflow_run_url}) for [commit]({commit_url})",
-        )
-    else:
-        create_annotations(
-            "commit_url",
-            "info",
-            f"Triggered for [commit]({commit_url})",
-        )
+    # if workflow_run_url is not None:
+    #     create_annotations(
+    #         "workflow_url",
+    #         "info",
+    #         f"Triggered by [Github Action]({workflow_run_url}) for [commit]({commit_url})",
+    #     )
+    # else:
+    #     create_annotations(
+    #         "commit_url",
+    #         "info",
+    #         f"Triggered for [commit]({commit_url})",
+    #     )
 
     chart_yaml = False
 
-    if args.repo_path_override:
-        chart_config_path = path.join(
-            args.repo_path_override, ".charts", args.chart, "Chart.yaml"
-        )
-        with open(chart_config_path, "r") as fpChart:
-            chart_yaml = fpChart.read()
-    else:
-        chart_yaml = download_chart_yaml(args.repo_name, args.repo_sha1, args.chart)
+    # if args.repo_path_override:
+    # chart_config_path = path.join(args.repo_path_override, ".charts", args.chart, "Chart.yaml")
+    with open("script/Chart.yaml", "r") as fpChart:
+        chart_yaml = fpChart.read()
+    # else:
+        # chart_yaml = download_chart_yaml(args.repo_name, args.repo_sha1, args.chart)
 
     version = args.version if args.version else ""
     prune = "True" if args.prune.lower() == "true" else "False"
@@ -172,7 +170,7 @@ def main():
     # Check if the release train is "disabled" via the chart-dashboard
     add_block_step_if_disabled(args.chart, args.chart_control_hostname, args.repo_name)
 
-    non_frozen_cluster_groups = filter_clusters_in_freeze(cluster_groups)
+    non_frozen_cluster_groups = cluster_groups
 
     if skip_deployment_to_production:
         non_production_cluster_groups = filter_production_clusters(non_frozen_cluster_groups)
@@ -288,31 +286,31 @@ def print_disabled_block_step(message):
     )
 
 
-def download_chart_yaml(repo, sha1, chart):
-    url = (
-        "https://raw.githubusercontent.com/tink-ab/"
-        + "{}/{}/.charts/{}/Chart.yaml".format(repo, sha1, chart)
-    )
-    request = urllib.request.Request(url)
-    auth = read_gh_creds()
-    request.add_header("Authorization", auth)
-    return urllib.request.urlopen(request).read()
+# def download_chart_yaml(repo, sha1, chart):
+#     url = (
+#         "https://raw.githubusercontent.com/tink-ab/"
+#         + "{}/{}/.charts/{}/Chart.yaml".format(repo, sha1, chart)
+#     )
+#     request = urllib.request.Request(url)
+#     auth = read_gh_creds()
+#     request.add_header("Authorization", auth)
+#     return urllib.request.urlopen(request).read()
 
 
-def read_gh_creds():
-    if path.exists("/credentials/git/token"):
-        with open("/credentials/git/token", "r") as token_file:
-            token = token_file.read()
-            auth = "Bearer %s" % token
-    else:
-        with open("/credentials/git/username", "r") as uname:
-            username = uname.read()
-        with open("/credentials/git/password", "r") as pword:
-            password = pword.read()
-        auth = "Basic %s" % base64.b64encode(
-            "{}:{}".format(username, password).encode("utf-8")
-        )
-    return auth
+# def read_gh_creds():
+#     if path.exists("/credentials/git/token"):
+#         with open("/credentials/git/token", "r") as token_file:
+#             token = token_file.read()
+#             auth = "Bearer %s" % token
+#     else:
+#         with open("/credentials/git/username", "r") as uname:
+#             username = uname.read()
+#         with open("/credentials/git/password", "r") as pword:
+#             password = pword.read()
+#         auth = "Basic %s" % base64.b64encode(
+#             "{}:{}".format(username, password).encode("utf-8")
+#         )
+#     return auth
 
 
 def cluster_groups_custom(strategy):
@@ -510,29 +508,29 @@ def trigger_step(
     return obj
 
 
-def filter_clusters_in_freeze(
-    cluster_groups, date=datetime.datetime.now().strftime("%Y-%m-%d")
-):
-    return [
-        cg
-        for cg in [
-            [
-                cluster
-                for cluster in cluster_group
-                if not skip_release_filter(cluster, date)
-            ]
-            for cluster_group in cluster_groups
-        ]
-        if cg != []
-    ]
+# def filter_clusters_in_freeze(
+#     cluster_groups, date=datetime.datetime.now().strftime("%Y-%m-%d")
+# ):
+#     return [
+#         cg
+#         for cg in [
+#             [
+#                 cluster
+#                 for cluster in cluster_group
+#                 if not skip_release_filter(cluster, date)
+#             ]
+#             for cluster_group in cluster_groups
+#         ]
+#         if cg != []
+#     ]
 
 
-def skip_release_filter(cluster, date):
-    if cluster["cluster"] == "cornwall" and is_seb_restricted_date(date):
-        return True
-    if cluster.get("hotfix_only"):
-        return True
-    return False
+# def skip_release_filter(cluster, date):
+#     if cluster["cluster"] == "cornwall" and is_seb_restricted_date(date):
+#         return True
+#     if cluster.get("hotfix_only"):
+#         return True
+#     return False
 
 
 def create_annotations(context, style, message):
