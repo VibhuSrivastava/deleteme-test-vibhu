@@ -28,24 +28,19 @@ import yaml  # pip install pyyaml
 import subprocess
 import os
 
-GLOBAL_PRODUCTION = "global-production"
-OXFORD_TESTING = "oxford-testing"
-
-BLACKLISTED_CLUSTERS = [
-    "kerry",
-    "kirkby",
-]
+GLOBAL_PRODUCTION = "cluster6-production"
+OXFORD_TESTING = "cluster9-testing"
 
 # Deploy to these by adding the "deploy-to-non-aws"
 ON_PREM_CLUSTERS = [
-    "cornwall-testing",
-    "cornwall-production",
+    "cluster1-testing",
+    "cluster1-production",
 ]
 
-# Deploy to the se with the "deploy-to-aggregation" config
+# Deploy to the se with the "deploy-to-cluster10" config
 AGGREGATION_CLUSTERS = [
-    "aggregation-staging",
-    "aggregation-production",
+    "cluster10-staging",
+    "cluster10-production",
 ]
 
 with open(
@@ -118,10 +113,10 @@ def main():
 
     if deployment["strategy"] == "default":
         cluster_groups = cluster_groups_default(
-            deploy_to_aggregation=deployment.get("to_aggregation", False),
+            deploy_to_cluster10=deployment.get("to_cluster10", False),
             deploy_to_on_prem=deployment.get("to_on_prem", False),
-            deploy_to_global=deployment.get("to_global", False),
-            deploy_to_oxford_testing=deployment.get("to_oxford_testing", False),
+            deploy_to_cluster6=deployment.get("to_cluster6", False),
+            deploy_to_cluster9_testing=deployment.get("to_cluster9_testing", False),
             explicit_exclude_clusters=deployment.get("exclude_clusters", []),
             deploy_to_additional_clusters=deployment.get("additional_clusters", []),
         )
@@ -179,7 +174,7 @@ def cli_args_parser():
         "--chart-control-hostname",
         type=str,
         required=False,
-        default="tink-release-train-int.release-train.svc.cluster.local",
+        default="",
     )
     parser.add_argument("--pull-requests", type=str, required=False)
     parser.add_argument("--chart-repo", type=str, required=False)
@@ -224,10 +219,10 @@ def end_to_end_test_enabled(clusters_envs, cluster, env):
 
 
 def cluster_groups_default(
-    deploy_to_aggregation,
+    deploy_to_cluster10,
     deploy_to_on_prem,
-    deploy_to_global,
-    deploy_to_oxford_testing,
+    deploy_to_cluster6,
+    deploy_to_cluster9_testing,
     explicit_exclude_clusters=[],
     deploy_to_additional_clusters=[],
 ):
@@ -248,16 +243,16 @@ def cluster_groups_default(
             if not deploy_to_on_prem and combined_name in ON_PREM_CLUSTERS:
                 continue
 
-            # Skip aggregation
-            if not deploy_to_aggregation and combined_name in AGGREGATION_CLUSTERS:
+            # Skip cluster10
+            if not deploy_to_cluster10 and combined_name in AGGREGATION_CLUSTERS:
                 continue
 
-            # Skip global
-            if not deploy_to_global and combined_name == GLOBAL_PRODUCTION:
+            # Skip cluster6
+            if not deploy_to_cluster6 and combined_name == GLOBAL_PRODUCTION:
                 continue
 
-            # Skip oxford-testing
-            if not deploy_to_oxford_testing and combined_name == OXFORD_TESTING:
+            # Skip cluster9-testing
+            if not deploy_to_cluster9_testing and combined_name == OXFORD_TESTING:
                 continue
 
             res_group.append(env)

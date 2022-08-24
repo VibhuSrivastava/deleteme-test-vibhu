@@ -1,38 +1,38 @@
 [
     [
-        {"cluster": "cornwall", "environment": "testing"},
-        {"cluster": "oxford", "environment": "testing"}
+        {"cluster": "cluster1", "environment": "testing"},
+        {"cluster": "cluster2", "environment": "testing"}
     ],
     [
-        {"cluster": "aggregation", "environment": "staging"},
-        {"cluster": "barnsley", "environment": "staging"},
-        {"cluster": "cardiff", "environment": "staging"},
-        {"cluster": "farnham", "environment": "staging"},
-        {"cluster": "leeds", "environment": "staging"},
-        {"cluster": "oxford", "environment": "staging"},
-        {"cluster": "rugby", "environment": "staging"},
-        {"cluster": "oxford", "environment": "preprod"}
+        {"cluster": "cluster3", "environment": "staging"},
+        {"cluster": "cluster4", "environment": "staging"},
+        {"cluster": "cluster6", "environment": "staging"},
+        {"cluster": "cluster7", "environment": "staging"},
+        {"cluster": "cluster8", "environment": "staging"},
+        {"cluster": "cluster2", "environment": "staging"},
+        {"cluster": "cluster9", "environment": "staging"},
+        {"cluster": "cluster2", "environment": "preprod"}
     ],
     [
-        {"cluster": "barnsley", "environment": "production"},
-        {"cluster": "cornwall", "environment": "production"},
-        {"cluster": "global", "environment": "production"},
+        {"cluster": "cluster4", "environment": "production"},
+        {"cluster": "cluster1", "environment": "production"},
+        {"cluster": "cluster10", "environment": "production"},
     ],
     [
-        {"cluster": "cardiff", "environment": "production"},
-        {"cluster": "farnham", "environment": "production"},
+        {"cluster": "cluster6", "environment": "production"},
+        {"cluster": "cluster7", "environment": "production"},
     ],
     [
-        {"cluster": "aggregation", "environment": "production"},
-        {"cluster": "leeds", "environment": "production"},
-        {"cluster": "oxford", "environment": "production"},
-        {"cluster": "rugby", "environment": "production"}
+        {"cluster": "cluster3", "environment": "production"},
+        {"cluster": "cluster8", "environment": "production"},
+        {"cluster": "cluster2", "environment": "production"},
+        {"cluster": "cluster9", "environment": "production"}
     ],
     [
-        {"cluster": "neston", "environment": "staging"}
+        {"cluster": "cluster11", "environment": "staging"}
     ],
     [
-        {"cluster": "neston", "environment": "preprod"},
-        {"cluster": "neston", "environment": "production"}
+        {"cluster": "cluster11", "environment": "preprod"},
+        {"cluster": "cluster11", "environment": "production"}
     ]
 ]
