@@ -1,18 +1,12 @@
 steps:
   - command: |
       set -euo pipefail
-      /usr/bin/agent-scripts/generate-release-train.py \
-          --repo-name= test-release-train-github-workflow \
-          --repo-sha1=$REPO_SHA1 \
-          --chart-repo=${CHART_REPO:-} \
-          --chart-version=${CHART_VERSION:-} \
-          --chart=$CHART \
-          --version=${VERSION:-} \
-          --no-external-tests=${NO_EXTERNAL_TESTS:-false} \
-          --no-email-notifications=${NO_EMAIL_NOTIFICATIONS:-false} \
-          --prune=$PRUNE \
-          --skip-deployment-to-production=$${SKIP_DEPLOYMENT_TO_PRODUCTION:-false} \
-          --pull-requests=${PULL_REQUESTS:-} \
+      ../script/generate-release-train.py \
+          --chart deleteme-vibhu \
+          --repo-name deleteme-test-vibhu \
+          --prune false \
+          --skip-deployment-to-production true \
+          --release-train-disabled true \
         | buildkite-agent pipeline upload
     label: ":pipeline: $CHART"
     agents:

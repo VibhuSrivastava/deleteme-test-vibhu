@@ -205,7 +205,7 @@ def cli_args_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--version", type=str, required=False)
     parser.add_argument("--repo-name", type=str, required=True)
-    parser.add_argument("--repo-sha1", type=str, required=True)
+    parser.add_argument("--repo-sha1", type=str, required=False)
     parser.add_argument("--chart", type=str, required=True)
     parser.add_argument("--prune", type=str, required=True)
     parser.add_argument("--no-external-tests", type=str, required=False)
