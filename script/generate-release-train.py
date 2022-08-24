@@ -54,15 +54,6 @@ with open(
     DEFAULT_STRATEGY_ALL_CLUSTERS = yaml.load(clusters, Loader=yaml.SafeLoader)
 
 
-def filter_deprecated_clusters(cluster_groups):
-    new_cluster_groups = []
-    for g in cluster_groups:
-        new_cluster_groups.append(
-            [c for c in g if c["cluster"] not in BLACKLISTED_CLUSTERS]
-        )
-    return new_cluster_groups
-
-
 def filter_production_clusters(cluster_groups):
     new_cluster_groups = []
     for g in cluster_groups:
@@ -85,30 +76,9 @@ def main():
     parser = cli_args_parser()
     args = parser.parse_args()
 
-    # workflow_run_url = os.getenv("WORKFLOW_RUN_URL")
-    # commit_url = f"https://github.com/tink-ab/{args.repo_name}/commit/{args.repo_sha1}"
-
-    # if workflow_run_url is not None:
-    #     create_annotations(
-    #         "workflow_url",
-    #         "info",
-    #         f"Triggered by [Github Action]({workflow_run_url}) for [commit]({commit_url})",
-    #     )
-    # else:
-    #     create_annotations(
-    #         "commit_url",
-    #         "info",
-    #         f"Triggered for [commit]({commit_url})",
-    #     )
-
     chart_yaml = False
-
-    # if args.repo_path_override:
-    # chart_config_path = path.join(args.repo_path_override, ".charts", args.chart, "Chart.yaml")
     with open("script/Chart.yaml", "r") as fpChart:
         chart_yaml = fpChart.read()
-    # else:
-        # chart_yaml = download_chart_yaml(args.repo_name, args.repo_sha1, args.chart)
 
     version = args.version if args.version else ""
     prune = "True" if args.prune.lower() == "true" else "False"
@@ -118,12 +88,8 @@ def main():
     no_email_notifications = str(
         args.no_email_notifications and args.no_email_notifications.lower() == "true"
     )
-    skip_deployment_to_production = str(
-        args.skip_deployment_to_production and args.skip_deployment_to_production.lower() == "true"
-    )
-    release_train_disabled = str(
-        args.release_train_disabled and args.release_train_disabled.lower() == "true"
-    )
+    skip_deployment_to_production = True if args.skip_deployment_to_production.lower() == "true" else False
+    release_train_disabled = True if args.release_train_disabled.lower() == "true" else False
 
     chart = yaml.load(chart_yaml, Loader=yaml.SafeLoader)
     deployment = chart["tink"]["deployment"]
@@ -160,8 +126,6 @@ def main():
             deploy_to_additional_clusters=deployment.get("additional_clusters", []),
         )
 
-    cluster_groups = filter_deprecated_clusters(cluster_groups)
-
     chart_end_to_end_test_configuration = chart["tink"].get("end_to_end_tests", {})
 
     generate_hotfix_release_triggers(
@@ -170,8 +134,6 @@ def main():
         chart_end_to_end_test_configuration,
     )
 
-    # Check if the release train is "disabled" via the chart-dashboard
-    # add_block_step_if_disabled(args.chart, args.chart_control_hostname, args.repo_name)
     if release_train_disabled:
         print_disabled_block_step("The release-train for this chart has been disabled via the "
                                   "chart-dashboard. Continue?")
@@ -230,55 +192,6 @@ def cli_args_parser():
     return parser
 
 
-def add_block_step_if_disabled(chart, chart_control_hostname, repo_name):
-    for x in range(0, 10):
-        try:
-            quoted_chart = urllib.parse.quote(chart)
-            quoted_repo_name = urllib.parse.quote(repo_name)
-            url = f"http://{chart_control_hostname}/train-enabled?chart={quoted_chart}&repo={quoted_repo_name}"
-            print(url, file=sys.stderr)
-            status_code = url_status(url)
-        except urllib.error.HTTPError as e:
-            # Chart name is used in another repo, this is a failing condition
-            if e.code == 409:
-                body = e.read()
-                msg = body.decode("utf-8")
-                print(f"Error: {msg}", file=sys.stderr)
-                sys.exit(1)
-            else:
-                print(e, file=sys.stderr)
-        except Exception as e:
-            print(e, file=sys.stderr)
-            pass
-        else:
-            # OK!
-            if status_code == 200:
-                return
-
-            # Explicitly disabled
-            if status_code == 204:
-                print_disabled_block_step("The release-train for this chart has been disabled via the "
-                                          "chart-dashboard. Continue?")
-                return
-
-        print(
-            "Failed to contact chart-dashboard will retry again in 30s",
-            file=sys.stderr,
-        )
-        time.sleep(30)
-
-    # Failed to contact the chart dashboard
-    print_disabled_block_step("The release-train for this chart has been disabled via the chart-dashboard. Continue?")
-    return
-
-
-def url_status(url):
-    r = urllib.request.urlopen(url)
-    _ = r.read()
-    status_code = r.getcode()
-    return status_code
-
-
 def print_disabled_block_step(message):
     print(
         yaml.dump(
@@ -291,33 +204,6 @@ def print_disabled_block_step(message):
             default_style='"',
         )
     )
-
-
-# def download_chart_yaml(repo, sha1, chart):
-#     url = (
-#         "https://raw.githubusercontent.com/tink-ab/"
-#         + "{}/{}/.charts/{}/Chart.yaml".format(repo, sha1, chart)
-#     )
-#     request = urllib.request.Request(url)
-#     auth = read_gh_creds()
-#     request.add_header("Authorization", auth)
-#     return urllib.request.urlopen(request).read()
-
-
-# def read_gh_creds():
-#     if path.exists("/credentials/git/token"):
-#         with open("/credentials/git/token", "r") as token_file:
-#             token = token_file.read()
-#             auth = "Bearer %s" % token
-#     else:
-#         with open("/credentials/git/username", "r") as uname:
-#             username = uname.read()
-#         with open("/credentials/git/password", "r") as pword:
-#             password = pword.read()
-#         auth = "Basic %s" % base64.b64encode(
-#             "{}:{}".format(username, password).encode("utf-8")
-#         )
-#     return auth
 
 
 def cluster_groups_custom(strategy):
@@ -513,37 +399,6 @@ def trigger_step(
     }
 
     return obj
-
-
-# def filter_clusters_in_freeze(
-#     cluster_groups, date=datetime.datetime.now().strftime("%Y-%m-%d")
-# ):
-#     return [
-#         cg
-#         for cg in [
-#             [
-#                 cluster
-#                 for cluster in cluster_group
-#                 if not skip_release_filter(cluster, date)
-#             ]
-#             for cluster_group in cluster_groups
-#         ]
-#         if cg != []
-#     ]
-
-
-# def skip_release_filter(cluster, date):
-#     if cluster["cluster"] == "cornwall" and is_seb_restricted_date(date):
-#         return True
-#     if cluster.get("hotfix_only"):
-#         return True
-#     return False
-
-
-def create_annotations(context, style, message):
-    run_command(
-        ["buildkite-agent", "annotate", message, "--style", style, "--context", context]
-    )
 
 
 def run_command(command):
