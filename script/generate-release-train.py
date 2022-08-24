@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
 Testable locally with:
-python3 .charts/buildkite-agent/agent-scripts/generate-release-train.py \
-  --chart prometheus \
-  --repo-name tink-infrastructure \
-  --repo-sha1 abc12 \
-  --version 100 \
-  --repo-path-override ~/src/tink-infrastructure \
-  --prune false
+python3 script/generate-release-train.py \
+  --chart deleteme-vibhu \
+  --repo-name deleteme-test-vibhu \
+  --repo-sha1 4b3dda6 \
+  --prune false \
+  --skip-deployment-to-production true \
+  --release-train-disabled true
 """
 
 from __future__ import print_function
