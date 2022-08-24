@@ -121,6 +121,9 @@ def main():
     skip_deployment_to_production = str(
         args.skip_deployment_to_production and args.skip_deployment_to_production.lower() == "true"
     )
+    release_train_disabled = str(
+        args.release_train_disabled and args.release_train_disabled.lower() == "true"
+    )
 
     chart = yaml.load(chart_yaml, Loader=yaml.SafeLoader)
     deployment = chart["tink"]["deployment"]
@@ -168,7 +171,10 @@ def main():
     )
 
     # Check if the release train is "disabled" via the chart-dashboard
-    add_block_step_if_disabled(args.chart, args.chart_control_hostname, args.repo_name)
+    # add_block_step_if_disabled(args.chart, args.chart_control_hostname, args.repo_name)
+    if release_train_disabled:
+        print_disabled_block_step("The release-train for this chart has been disabled via the "
+                                  "chart-dashboard. Continue?")
 
     non_frozen_cluster_groups = cluster_groups
 
@@ -205,6 +211,7 @@ def cli_args_parser():
     parser.add_argument("--no-external-tests", type=str, required=False)
     parser.add_argument("--no-email-notifications", type=str, required=False)
     parser.add_argument("--skip-deployment-to-production", type=str, required=False)
+    parser.add_argument("--release-train-disabled", type=str, required=False)
 
     parser.add_argument(
         "--chart-control-hostname",
